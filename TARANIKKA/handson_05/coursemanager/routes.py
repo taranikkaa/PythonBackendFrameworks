@@ -17,9 +17,16 @@ def handle_courses():
         data = request.get_json() or {}
         required_fields = ['name', 'code', 'credits', 'department_id']
         missing_fields = [field for field in required_fields if field not in data]
+        
         if missing_fields:
             return jsonify({'status': 'error', 'message': f'Missing fields: {", ".join(missing_fields)}'}), 400
-        new_course = Course(name=data['name'], code=data['code'], credits=data['credits'], department_id=data['department_id'])
+            
+        new_course = Course(
+            name=data['name'], 
+            code=data['code'], 
+            credits=data['credits'], 
+            department_id=data['department_id']
+        )
         db.session.add(new_course)
         db.session.commit()
         return make_response_json(new_course.to_dict(), 201)
@@ -27,8 +34,10 @@ def handle_courses():
 @courses_bp.route('/<int:course_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_single_course(course_id):
     course = Course.query.get_or_404(course_id)
+    
     if request.method == 'GET':
         return make_response_json(course.to_dict(), 200)
+        
     if request.method == 'PUT':
         data = request.get_json() or {}
         course.name = data.get('name', course.name)
@@ -36,6 +45,7 @@ def handle_single_course(course_id):
         course.credits = data.get('credits', course.credits)
         db.session.commit()
         return make_response_json(course.to_dict(), 200)
+        
     if request.method == 'DELETE':
         db.session.delete(course)
         db.session.commit()
